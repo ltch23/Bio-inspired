@@ -21,7 +21,8 @@ def codBintoR(n_bin):
 		rpta1 += (2**i)*n_bin[i]
 	rpta1 = left+rpta1*((right-left)/((2**l)-1))
 	print("R1: ",rpta1)
-	for i in range(l,l):
+
+	for i in range(l,l*2):
 		rpta2 += (2**i)*n_bin[i]
 	rpta2 = left+rpta2*((right-left)/((2**l)-1))
 	print("R2: ",rpta2)
