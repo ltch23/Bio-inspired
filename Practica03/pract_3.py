@@ -7,7 +7,7 @@ dig=6
 left = -100
 right = 100
 l=0
-m_size=10
+m_size=2
 total=0
 g=2
 def individuo():
@@ -34,6 +34,10 @@ def codBintoR(n_bin):
 	rpta2 = left+rpta2*((right-left)/((2**l)-1))
 	# print("R2: ",rpta2)
 	return [rpta1,rpta2]
+
+def inv(x):
+	if x == 0: return 1
+	else: return 0
 
 def function(x_bin):
 	x=codBintoR(x_bin)
@@ -66,7 +70,7 @@ def ruleta(total):
 	n_rand = np.random.rand(1)*total
 	# n_rand = random()*total
 	# print("total: ",total)
-	print("n_rand: ",n_rand)
+	# print("n_rand: ",n_rand)
 	for i in range(m_size):
 		# print(n_rand,"  ",all_x[i,2*l+1])
 		if np.greater_equal(n_rand,all_x[i,2*l+1])==True:
@@ -74,31 +78,70 @@ def ruleta(total):
 		else:
 			return i-1
 
-def selection():
-	#
+# def selection():
+# 	#
 
-def cruce():
-	 sel_ind_A = d2b(selected[j],x_size)
-        sel_ind_B = d2b(selected[j+1],x_size)
-    
-    #select point to cross over
-        cut_point = randint(1,x_size)
-    
-    #new individual AB
-        ind_AB = sel_ind_A[:cut_point] + sel_ind_B[cut_point:]
+
+def cruce(select,porcetanje):
+	print("**cruce**")
+	sel_1=sel_2=ind_12=np.zeros(2*l)
+	cruce_all=np.zeros((m_size,2*l))
+	for j in range(m_size):
+
+		n_rand = random()
+		print("n_rand: ", n_rand)
+
+		sel_1 = select[j,:2*l]
+		if n_rand > porcetanje:
+			rand = randint(0,m_size-1)
+			sel_2 = select[rand,:2*l]
+			# print("sel_1: ",sel_1,"\nsel_2: ",sel_2)
+			cut = randint(1,2*l)
+			ind_12 = np.concatenate((sel_1[:cut],sel_2[cut:]))
+			# print("crecu: ",sel_1[:cut],"+",sel_2[cut:])
+			print("cruce: ",ind_12)
+			cruce_all[j,:]=ind_12
+		else:
+			cruce_all[j,:]=select[j,:2*l]
+			# print("here")
+	print("__cruce__")
+	return cruce_all
+
+
+def mute(cruce_all,porcetanje):
+
+	print("**mute**")
+	for i in range(m_size):
+		n_rand = random()
+		print("n_rand: ", n_rand)
+		if n_rand > porcetanje:
+			cut = randint(1,2*l)
+			print("cut: ",cut,)
+			# print("before: ",cruce_all[i])
+			cruce_all[i,cut]=inv(cruce_all[i,cut])
+			print("mute: ",cruce_all[i])
+	print("__mute__")
+
 def GA():
     #Reseting list for 2nd generation
 	for i in range(g):
+		print (i," \n")
 		total=aptitud()
 		selected = np.zeros((m_size,2*l+3))
+		v_cruce = np.zeros((m_size,2*l+3))
+		# v_mute = np.zeros((m_size,2*l+3))
+
 		print("all_x")
-		print(all_x[:,56:])
+		# print(all_x[:,2*l:])
 		for j in range(m_size):
 			i_sel = ruleta(total)
 			selected[j,:-2]=all_x[i_sel,:-2]
+		v_cruce = cruce(selected,0.5)			
+		mute(v_cruce,0.5)
+		# print(v_cruce)
 		all_x[:,:-2]=selected[:,:-2]
-		print("selected")
-		print(selected[:,56:])
+		# print("selected")
+		# print(selected[:,2*l:])
 
 	return 0 
 
