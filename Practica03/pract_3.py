@@ -59,12 +59,14 @@ def aptitud():
 		tmp+=all_x[i,2*l]
 		all_x[i,2*l+1] = tmp
 		all_x[i,2*l+2] = all_x[i,2*l]/total
+	print ("total: ",total)
 	return total
 
-def ruleta():
+def ruleta(total):
 	n_rand = np.random.rand(1)*total
+	# n_rand = random()*total
 	# print("total: ",total)
-	# print("n_rand: ",n_rand[:])
+	print("n_rand: ",n_rand)
 	for i in range(m_size):
 		# print(n_rand,"  ",all_x[i,2*l+1])
 		if np.greater_equal(n_rand,all_x[i,2*l+1])==True:
@@ -72,18 +74,31 @@ def ruleta():
 		else:
 			return i-1
 
+def selection():
+	#
+
+def cruce():
+	 sel_ind_A = d2b(selected[j],x_size)
+        sel_ind_B = d2b(selected[j+1],x_size)
+    
+    #select point to cross over
+        cut_point = randint(1,x_size)
+    
+    #new individual AB
+        ind_AB = sel_ind_A[:cut_point] + sel_ind_B[cut_point:]
 def GA():
-	for i in range(g):
     #Reseting list for 2nd generation
-  
-   		selected = np.zeros((m_size,2*l+3))
-   		print("all_x")
-   		print(all_x[:,56:])
-   		for j in range(m_size):
-   			i_sel = ruleta()
-   			selected[j,:]=all_x[i_sel,:]
-   		print("selected")
-   		print(selected[:,56:])
+	for i in range(g):
+		total=aptitud()
+		selected = np.zeros((m_size,2*l+3))
+		print("all_x")
+		print(all_x[:,56:])
+		for j in range(m_size):
+			i_sel = ruleta(total)
+			selected[j,:-2]=all_x[i_sel,:-2]
+		all_x[:,:-2]=selected[:,:-2]
+		print("selected")
+		print(selected[:,56:])
 
 	return 0 
 
@@ -93,8 +108,8 @@ if __name__ == '__main__':
 	gen_fx,all_x = functions(gen_x)
 	
 	# print(all_x[:,56:])
-	total=aptitud()
-	selec=ruleta()
+	
+	# selec=ruleta()
 	# print("all_x")
 
 	# print(all_x[selec,:])
