@@ -1,12 +1,15 @@
 import numpy as np
 import math as m
 from matplotlib import pyplot
+from random import *
 
 dig=6
 left = -100
 right = 100
 l=0
 m_size=10
+total=0
+g=2
 def individuo():
 	n_bin = np.random.randint(2, size=(l*2,))
 	# num_r=codBintoR(n_bin)
@@ -40,31 +43,63 @@ def function(x_bin):
 	return 0.5 - num/den
 
 def functions(xs):
-	# print(xs)
-	# print(xs.shape[0])
-	# print(xs[9,:])
 	arr=np.zeros(m_size)
 
-	all_x=np.zeros((m_size,2*l+1))
+	all_x=np.zeros((m_size,2*l+3))
 	for i in range(xs.shape[0]):
 		arr[i]=function(xs[i])
-		all_x[:,:-1] = xs[i]
-		all_x[i,56] = arr[i]
-	# print("xs: ",xs[1].shape)
-	# print(all_x[0,56])
-
-	# print("all: ",all_x)
-	# print("all: ",all_x[:,:-1] )
+		all_x[:,:-3] = xs[i]
+		all_x[i,2*l] = arr[i]
 	return arr,all_x
+
+def aptitud():
+	tmp=0
+	total=np.sum(all_x[:,56])
+	for i in range(m_size):
+		tmp+=all_x[i,2*l]
+		all_x[i,2*l+1] = tmp
+		all_x[i,2*l+2] = all_x[i,2*l]/total
+	return total
+
+def ruleta():
+	n_rand = np.random.rand(1)*total
+	# print("total: ",total)
+	# print("n_rand: ",n_rand[:])
+	for i in range(m_size):
+		# print(n_rand,"  ",all_x[i,2*l+1])
+		if np.greater_equal(n_rand,all_x[i,2*l+1])==True:
+			continue
+		else:
+			return i-1
+
+def GA():
+	for i in range(g):
+    #Reseting list for 2nd generation
+  
+   		selected = np.zeros((m_size,2*l+3))
+   		print("all_x")
+   		print(all_x[:,56:])
+   		for j in range(m_size):
+   			i_sel = ruleta()
+   			selected[j,:]=all_x[i_sel,:]
+   		print("selected")
+   		print(selected[:,56:])
+
+	return 0 
 
 if __name__ == '__main__':
 	l = gen_l(dig)
 	gen_x = popul(m_size)
 	gen_fx,all_x = functions(gen_x)
-	# print("all_x\n",gen_fx)
-	print("all\n",all_x)
-	# print("all\n",all_x[0])
-	print(all_x[0,56])
+	
+	# print(all_x[:,56:])
+	total=aptitud()
+	selec=ruleta()
+	# print("all_x")
+
+	# print(all_x[selec,:])
+	# print(all_x[:,56:])
+	GA()
 	# print("sum: ", sum(all_x[:,56]))
 	# print("x: ",x_bin)
 	# fx=function(x_bin)
