@@ -11,8 +11,8 @@ dig=6
 left = -100
 right = 100
 i_max=0
-m_size=40
-g=100
+m_size=100
+g=40
 
 
 def gen_l(p):
@@ -74,6 +74,11 @@ def max_():
 	i_max=ind
 	print("mejor: ",all_x[i_max,2*l:2*l+3])
 
+def swap(x1,x2):
+	temp=x1
+	x1=x2
+	x2=temp
+	return x1,x2
 
 def elitism(xs):
 	rand = randint(0,m_size-1)
@@ -81,11 +86,14 @@ def elitism(xs):
 	xs[rand,:]=	all_x[i_max,:2*l]
 	return xs	
 
+def normalization(min_,max_):
+	np.sort(all_x[:,2*l+2],axis=0)
+	for i in range(m_size):
+		all_x[i,2*l+2]= min_ +((max_-min_)/(m_size-1))*(i-1)
+
 def ruleta(total):
 	n_rand = np.random.rand(1)*total
-	# n_rand = random()*total
-	# print("total: ",total)
-	# print("n_rand: ",n_rand)
+	
 	for i in range(m_size):
 		# print(n_rand,"  ",all_x[i,2*l+1])
 		if np.greater_equal(n_rand,all_x[i,2*l+3])==True:
@@ -96,6 +104,8 @@ def ruleta(total):
 def select_ruleta():
 	selected = np.zeros((m_size,2*l))
 	tmp=0
+	normalization(10,60)
+
 	total=np.sum(all_x[:,2*l+2])
 	# aptitud
 	for i in range(m_size):
@@ -105,15 +115,35 @@ def select_ruleta():
 
 	for j in range(m_size):
 		i_sel = ruleta(total)
-		selected[j,:]=all_x[i_sel,:-5]
+		selected[j,:]=all_x[i_sel,:-6]
 
 	return selected
+
+def select_estocast():
+	print("estocast")
+	selected = np.zeros((m_size,2*l))
+	tmp=0
+	total=np.sum(all_x[:,2*l+2])
+	# pri
+	# aptitud
+	for i in range(m_size):
+		tmp+=all_x[i,2*l+2]
+		all_x[i,2*l+3] = (m_size*all_x[i,2*l+2])/total
+		all_x[i,2*l+4] = int(all_x[i,2*l+3])
+		all_x[i,2*l+5] = all_x[i,2*l+3]-all_x[i,2*l+4]
+
+	print(all_x[:,2*l:2*l+6])
+	# for j in range(m_size):
+	# 	i_sel = ruleta(total)
+	# 	selected[j,:]=all_x[i_sel,:-5]
+
+	# return selected
 
 
 
 def selection_x():
 	select_ruleta()
-	select_asdsad()
+	select_estocast()
 
 # 	#
 
@@ -134,6 +164,67 @@ def cruce_1(select,porcetanje):
 			## print("sel_1: ",sel_1,"\nsel_2: ",sel_2)
 			cut = randint(1,2*l-1)
 			ind_12 = np.concatenate((sel_1[:cut],sel_2[cut:]))
+			## print("crecu: ",sel_1[:cut],"+",sel_2[cut:])
+			# print("cruce: ",ind_12)
+			cruced[j,:]=ind_12
+		else:
+			cruced[j,:]=select[j,:2*l]
+			# print("here")
+
+	# print("__cruce__")
+	return cruced
+
+def cruce_2(select,porcetanje):
+	# print("**cruce**")
+	sel_1=sel_2=ind_12=np.zeros(2*l)
+	cruced=np.zeros((m_size,2*l))
+	for j in range(m_size):
+
+		n_rand = random()
+		# print("n_rand: ", n_rand)
+
+		sel_1 = select[j,:2*l]
+		if n_rand > porcetanje:
+			rand = randint(0,m_size-1)
+			sel_2 = select[rand,:2*l]
+			## print("sel_1: ",sel_1,"\nsel_2: ",sel_2)
+			cut1 = randint(1,2*l-1)
+			cut2 = randint(1,2*l-1)
+			if  cut1 > cut2:
+				swap(cut1,cut2)
+
+			ind_12 = np.concatenate((sel_2[:cut1],sel_1[cut1:]))
+			ind_12 = np.concatenate((ind_12[:cut2],sel_2[cut2:]))
+
+			## print("crecu: ",sel_1[:cut],"+",sel_2[cut:])
+			# print("cruce: ",ind_12)
+			cruced[j,:]=ind_12
+		else:
+			cruced[j,:]=select[j,:2*l]
+			# print("here")
+
+	# print("__cruce__")
+	return cruced
+
+def cruce_3(select,porcetanje):
+	# print("**cruce**")
+	sel_1=sel_2=ind_12=np.zeros(2*l)
+	cruced=np.zeros((m_size,2*l))
+	for j in range(m_size):
+
+		n_rand = random()
+		# print("n_rand: ", n_rand)
+
+		sel_1 = select[j,:2*l]
+		if n_rand > porcetanje:
+
+			for k in range(2*l):
+				n_rand = random()
+				if n_rand >= 0.5:
+					ind_12[k]=sel_1[k]
+				else:
+					ind_12[k]=sel_2[k]
+
 			## print("crecu: ",sel_1[:cut],"+",sel_2[cut:])
 			# print("cruce: ",ind_12)
 			cruced[j,:]=ind_12
@@ -166,10 +257,10 @@ if __name__ == '__main__':
 	print("1ra generacion\n")
 
 	l=gen_l(dig)
-	all_x=np.zeros((m_size,2*l+5))
+	all_x=np.zeros((m_size,2*l+6))
 
 	gen_x = popul(m_size)
-	all_x[:,:-5] = gen_x
+	all_x[:,:-6] = gen_x
 	x,gen_fx = functions(gen_x)
 	all_x[:,2*l] = x[:,0]
 	all_x[:,2*l+1] = x[:,1]
@@ -179,19 +270,20 @@ if __name__ == '__main__':
 	# print(all_x[:,2*l:])
 	# print("all_x: ",all_x)
 	# selection_x()
+	# selected = select_estocast()
 	selected = select_ruleta()
-	cruced = cruce_1(selected,0.5)
+	
+	cruced = cruce_3(selected,0.5)
 	mute_1(cruced,0.5)	
-
-	# print("\n",cruced)
-	elitism(cruced)
-
-
+# '''
+# 	print("\n",cruced)
+# 	elitism(cruced)
+# '''
 	for i in range(g):
 		
 		print (i," generacion\n")
 
-		all_x[:,:-5] = cruced
+		all_x[:,:-6] = cruced
 		x,gen_fx = functions(cruced)
 		
 		all_x[:,2*l+2] = gen_fx
@@ -200,12 +292,13 @@ if __name__ == '__main__':
 		
 		print(all_x[:,2*l:2*l+3])
 		
-		selected = select_ruleta()	
-		cruced = cruce_1(selected,0.5)			
+		# selected = select_estocast()	
+		selected = select_ruleta()
+		cruced = cruce_3(selected,0.5)			
 		mute_1(cruced,0.5)
 		elitism(cruced)
+'''		
 		# print("\n",cruced)	
-
 		# print(v_cruce)
-		
+'''	
 
