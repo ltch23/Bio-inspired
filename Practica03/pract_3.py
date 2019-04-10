@@ -10,9 +10,9 @@ total=0
 dig=6
 left = -100
 right = 100
-
-m_size=10
-g=40
+i_max=0
+m_size=40
+g=100
 
 
 def gen_l(p):
@@ -50,14 +50,36 @@ def function(x_bin):
 	pow_xs = x[0]**2 + x[1]**2
 	num = m.sin(pow_xs)**2-0.5
 	den = (1.0+0.001*pow_xs)**2
-	return 0.5 - num/den
+	return x, 0.5 - num/den
 
 def functions(xs):
 	fx=np.zeros(m_size)
+	x=np.zeros((m_size,2))
 
 	for i in range(xs.shape[0]):
-		fx[i]=function(xs[i])
-	return fx
+		x[i],fx[i]=function(xs[i])
+	return x,fx
+
+def max_():
+	maximo=0
+	ind=0
+	for i in range(m_size):
+		temp=all_x[i,2*l+2]
+		# print("temp: ",temp)
+		if np.greater(temp,maximo) ==True:
+			maximo=temp
+			ind=i
+	# print("max ",np.amax(all_x[:,2*l+2]))	
+	# return all_x[ind,:]
+	i_max=ind
+	print("mejor: ",all_x[i_max,2*l:2*l+3])
+
+
+def elitism(xs):
+	rand = randint(0,m_size-1)
+	max_()
+	xs[rand,:]=	all_x[i_max,:2*l]
+	return xs	
 
 def ruleta(total):
 	n_rand = np.random.rand(1)*total
@@ -66,24 +88,24 @@ def ruleta(total):
 	# print("n_rand: ",n_rand)
 	for i in range(m_size):
 		# print(n_rand,"  ",all_x[i,2*l+1])
-		if np.greater_equal(n_rand,all_x[i,2*l+1])==True:
+		if np.greater_equal(n_rand,all_x[i,2*l+3])==True:
 			continue
 		else:
 			return i-1
 
 def select_ruleta():
-	selected = np.zeros((m_size,2*l+3))
+	selected = np.zeros((m_size,2*l))
 	tmp=0
-	total=np.sum(all_x[:,2*l])
+	total=np.sum(all_x[:,2*l+2])
 	# aptitud
 	for i in range(m_size):
-		tmp+=all_x[i,2*l]
-		all_x[i,2*l+1] = tmp
-		all_x[i,2*l+2] = all_x[i,2*l]/total
+		tmp+=all_x[i,2*l+2]
+		all_x[i,2*l+3] = tmp
+		all_x[i,2*l+4] = all_x[i,2*l+2]/total
 
 	for j in range(m_size):
 		i_sel = ruleta(total)
-		selected[j,:-2]=all_x[i_sel,:-2]
+		selected[j,:]=all_x[i_sel,:-5]
 
 	return selected
 
@@ -141,39 +163,48 @@ def mute_1(cruced,porcetanje):
 if __name__ == '__main__':
 	
 #algoritmo genetio
+	print("1ra generacion\n")
 
 	l=gen_l(dig)
-	all_x=np.zeros((m_size,2*l+3))
+	all_x=np.zeros((m_size,2*l+5))
 
 	gen_x = popul(m_size)
-
-
-	all_x[:,:-3] = gen_x
-	gen_fx = functions(gen_x)
-	all_x[:,2*l] = gen_fx[:]
-	print(all_x[:,2*l:])
+	all_x[:,:-5] = gen_x
+	x,gen_fx = functions(gen_x)
+	all_x[:,2*l] = x[:,0]
+	all_x[:,2*l+1] = x[:,1]
+	all_x[:,2*l+2] = gen_fx
+	
+	print(all_x[:,2*l:2*l+2])
+	# print(all_x[:,2*l:])
 	# print("all_x: ",all_x)
 	# selection_x()
 	selected = select_ruleta()
 	cruced = cruce_1(selected,0.5)
 	mute_1(cruced,0.5)	
-	print("\n",cruced)
+
+	# print("\n",cruced)
+	elitism(cruced)
 
 
 	for i in range(g):
 		
-		print (i," \n")
-		# print("all_x: ",all_x)
+		print (i," generacion\n")
 
-		all_x[:,:-3] = cruced
-		gen_fx = functions(cruced)
-		all_x[:,2*l] = gen_fx
-		print(all_x[:,2*l:])
-
+		all_x[:,:-5] = cruced
+		x,gen_fx = functions(cruced)
+		
+		all_x[:,2*l+2] = gen_fx
+		all_x[:,2*l] = x[:,0]
+		all_x[:,2*l+1] = x[:,1]
+		
+		print(all_x[:,2*l:2*l+3])
+		
 		selected = select_ruleta()	
 		cruced = cruce_1(selected,0.5)			
 		mute_1(cruced,0.5)
-		print("\n",cruced)	
+		elitism(cruced)
+		# print("\n",cruced)	
 
 		# print(v_cruce)
 		
