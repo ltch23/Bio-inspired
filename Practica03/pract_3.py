@@ -3,7 +3,7 @@ import math as m
 from matplotlib import pyplot
 from random import *
 
-# np.set_printoptions(suppress=True)
+np.set_printoptions(suppress=True)
 
 f = open("datos.txt", "r")
 data=[x.split() for x in f ]
@@ -27,6 +27,7 @@ dig=6
 left = -100
 right = 100
 i_max=0
+v_best=	np.zeros((exper,g))
 
 
 def gen_l(p):
@@ -38,7 +39,6 @@ def individuo():
 	
 def popul(size):
 	return np.array([individuo() for i in range(size)])
-
 
 def codBintoR(n_bin):
 	rpta1=rpta2=0
@@ -80,7 +80,8 @@ def max_():
 			maximo=temp
 			ind=i
 	i_max=ind
-	print("mejor: ",all_x[i_max,2*l:2*l+3])
+	mejor=all_x[i_max,2*l+2]
+	return mejor
 
 def swap(x1,x2):
 	temp=x1
@@ -107,7 +108,6 @@ def ruleta(total):
 			continue
 		else: return i-1
 	return i-1
-
 
 def select_ruleta():
 	selected = np.zeros((m_size,2*l))
@@ -245,58 +245,69 @@ def mute_1(cruced):
 
 if __name__ == '__main__':
 	
-	print("1ra generacion\n")
+	for it in range(exper):
 
-	l=gen_l(dig)
-	all_x=np.zeros((m_size,2*l+6))
+		print("\n0ra generacion")
 
-	gen_x = popul(m_size)
-	all_x[:,:-6] = gen_x
-	x,gen_fx = functions(gen_x)
-	all_x[:,2*l] = x[:,0]
-	all_x[:,2*l+1] = x[:,1]
-	all_x[:,2*l+2] = gen_fx
-	
-	if t_cruce=="1": selected=select_ruleta()
-	elif t_cruce=="2":selected=select_estocast()
+		l=gen_l(dig)
+		all_x=np.zeros((m_size,2*l+6))
 
-	print(all_x[:,2*l:2*l+2])
-	if t_cruce=="1": cruced=cruce_1(selected)
-	elif t_cruce=="2": cruced=cruce_2(selected)
-	elif t_cruce=="3": cruced=cruce_3(selected)
-
-	mute_1(cruced)	
-	if eli=="1": elitism(cruced)
-		
-# '''
-# 	print("\n",cruced)
-# '''
-	for i in range(g):
-		
-		print (i," generacion\n")
-
-		all_x[:,:-6] = cruced
-		x,gen_fx = functions(cruced)
-		
-		all_x[:,2*l+2] = gen_fx
+		gen_x = popul(m_size)
+		all_x[:,:-6] = gen_x
+		x,gen_fx = functions(gen_x)
 		all_x[:,2*l] = x[:,0]
 		all_x[:,2*l+1] = x[:,1]
+		all_x[:,2*l+2] = gen_fx
+		#los mejores
 		
-		print(all_x[:,2*l:2*l+2])
-		
-		if t_cruce=="1": selected=select_ruleta()
-		elif t_cruce=="2":selected=select_estocast()
+		mejor=max_()
+		print("mejor: ",mejor)
+		v_best[it,0]=mejor
 
-		print(all_x[:,2*l:2*l+2])
+		# print(all_x[:,2*l:2*l+2])
+
+		if t_sele=="1": selected=select_ruleta()
+		elif t_sele=="2":selected=select_estocast()
+
 		if t_cruce=="1": cruced=cruce_1(selected)
 		elif t_cruce=="2": cruced=cruce_2(selected)
 		elif t_cruce=="3": cruced=cruce_3(selected)
 
-		mute_1(cruced)
-		print("eli: ",eli)
+		mute_1(cruced)	
 		if eli=="1": elitism(cruced)
-'''		
-		# print("\n",cruced)	
-		# print(v_cruce)
-'''	
+			
+	# '''
+	# 	print("\n",cruced)
+	# '''
+		for i in range(g):
+			
+			print ("\n",i," generacion")
+
+			all_x[:,:-6] = cruced
+			x,gen_fx = functions(cruced)
+			
+			all_x[:,2*l] = x[:,0]
+			all_x[:,2*l+1] = x[:,1]
+			all_x[:,2*l+2] = gen_fx
+			
+			mejor=max_()
+			print("mejor: ",mejor)
+			v_best[it,i] = mejor
+						
+			# print(all_x[:,2*l:2*l+2])
+			
+			if t_sele=="1": selected=select_ruleta()
+			elif t_sele=="2":selected=select_estocast()
+
+			if t_cruce=="1": cruced=cruce_1(selected)
+			elif t_cruce=="2": cruced=cruce_2(selected)
+			elif t_cruce=="3": cruced=cruce_3(selected)
+
+			mute_1(cruced)
+			if eli=="1": elitism(cruced)
+	'''		
+			# print("\n",cruced)	
+			# print(v_cruce)
+	'''	
+	np.savetxt("best.txt",np.around(v_best,decimals=6),fmt="%.8g")
 
