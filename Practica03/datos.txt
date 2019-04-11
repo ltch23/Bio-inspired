@@ -1,0 +1,11 @@
+poblacion 100
+generaciones 40
+experimentos 20
+tipo_sele 1		1,2
+tipo_cruces 1      1,2,3 
+prob_cruce 0.5
+prob_mut 0.5
+elitismo 1	0 ->no 1 -> si 
+normalizacion 0 0 ->no 1 -> si
+v_min 10
+v_max 60

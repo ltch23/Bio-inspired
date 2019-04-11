@@ -3,7 +3,23 @@ import math as m
 from matplotlib import pyplot
 from random import *
 
-np.set_printoptions(suppress=True)
+# np.set_printoptions(suppress=True)
+
+f = open("datos.txt", "r")
+data=[x.split() for x in f ]
+
+m_size=int(data[0][1])
+g=int(data[1][1])
+exper= int(data[2][1])
+t_sele=data[3][1]
+t_cruce=data[4][1]
+p_cruce=float(data[5][1])
+p_mute=float(data[6][1])
+eli=data[7][1]
+nor=data[8][1]
+v_min=int(data[8][1])
+v_max=int(data[10][1])
+print(data)
 
 l=0
 total=0
@@ -11,13 +27,10 @@ dig=6
 left = -100
 right = 100
 i_max=0
-m_size=100
-g=40
 
 
 def gen_l(p):
 	return m.ceil(m.log2(right-left)+p*m.log2(10))
-
 
 def individuo():
 	n_bin = np.random.randint(2, size=(l*2,))
@@ -28,17 +41,14 @@ def popul(size):
 
 
 def codBintoR(n_bin):
-	# print("bin: ",n_bin)
 	rpta1=rpta2=0
 	for i in range(l):
 		rpta1 += (2**i)*n_bin[i]
 	rpta1 = left+rpta1*((right-left)/((2**l)-1))
-	# print("R1: ",rpta1)
 
 	for i in range(l,l*2):
 		rpta2 += (2**(i-l))*n_bin[i]
 	rpta2 = left+rpta2*((right-left)/((2**l)-1))
-	# print("R2: ",rpta2)
 	return [rpta1,rpta2]
 
 def inv(x):
@@ -69,8 +79,6 @@ def max_():
 		if np.greater(temp,maximo) ==True:
 			maximo=temp
 			ind=i
-	# print("max ",np.amax(all_x[:,2*l+2]))	
-	# return all_x[ind,:]
 	i_max=ind
 	print("mejor: ",all_x[i_max,2*l:2*l+3])
 
@@ -87,19 +95,19 @@ def elitism(xs):
 	return xs	
 
 def normalization(min_,max_):
-	np.sort(all_x[:,2*l+2],axis=0)
+	np.sort(all_x[:,2*l+3],axis=0)
 	for i in range(m_size):
-		all_x[i,2*l+2]= min_ +((max_-min_)/(m_size-1))*(i-1)
+		all_x[i,2*l+3]= min_ +((max_-min_)/(m_size-1))*(i-1)
 
 def ruleta(total):
 	n_rand = np.random.rand(1)*total
-	
 	for i in range(m_size):
-		# print(n_rand,"  ",all_x[i,2*l+1])
+		# print(n_rand,"  ",all_x[i,2*l+3])
 		if np.greater_equal(n_rand,all_x[i,2*l+3])==True:
 			continue
-		else:
-			return i-1
+		else: return i-1
+	return i-1
+
 
 def select_ruleta():
 	selected = np.zeros((m_size,2*l))
@@ -122,72 +130,57 @@ def select_ruleta():
 def select_estocast():
 	print("estocast")
 	selected = np.zeros((m_size,2*l))
-	tmp=0
+	tmp=cont=0
 	total=np.sum(all_x[:,2*l+2])
-	# pri
-	# aptitud
 	for i in range(m_size):
 		tmp+=all_x[i,2*l+2]
 		all_x[i,2*l+3] = (m_size*all_x[i,2*l+2])/total
 		all_x[i,2*l+4] = int(all_x[i,2*l+3])
 		all_x[i,2*l+5] = all_x[i,2*l+3]-all_x[i,2*l+4]
+	for j in range(m_size):
+		if np.greater_equal(all_x[j,2*l+4],1.0)==True:
+			selected[cont,:] = all_x[j,:-6]
+			cont+=1
+	tmp=0
+	for i in range(m_size):
+		tmp+=all_x[i,2*l+5]
+		all_x[i,2*l+3] = tmp
 
-	print(all_x[:,2*l:2*l+6])
-	# for j in range(m_size):
-	# 	i_sel = ruleta(total)
-	# 	selected[j,:]=all_x[i_sel,:-5]
+	for k in range(cont,m_size):
+		i_sel = ruleta(total)
+		selected[k,:]=all_x[i_sel,:-6]
 
-	# return selected
+	return selected
 
-
-
-def selection_x():
-	select_ruleta()
-	select_estocast()
-
-# 	#
-
-
-def cruce_1(select,porcetanje):
+def cruce_1(select):
 	# print("**cruce**")
 	sel_1=sel_2=ind_12=np.zeros(2*l)
 	cruced=np.zeros((m_size,2*l))
 	for j in range(m_size):
-
 		n_rand = random()
-		# print("n_rand: ", n_rand)
-
 		sel_1 = select[j,:2*l]
-		if n_rand > porcetanje:
+		if n_rand > p_cruce:
 			rand = randint(0,m_size-1)
 			sel_2 = select[rand,:2*l]
-			## print("sel_1: ",sel_1,"\nsel_2: ",sel_2)
 			cut = randint(1,2*l-1)
 			ind_12 = np.concatenate((sel_1[:cut],sel_2[cut:]))
-			## print("crecu: ",sel_1[:cut],"+",sel_2[cut:])
-			# print("cruce: ",ind_12)
 			cruced[j,:]=ind_12
 		else:
 			cruced[j,:]=select[j,:2*l]
-			# print("here")
-
-	# print("__cruce__")
 	return cruced
 
-def cruce_2(select,porcetanje):
+def cruce_2(select):
 	# print("**cruce**")
 	sel_1=sel_2=ind_12=np.zeros(2*l)
 	cruced=np.zeros((m_size,2*l))
 	for j in range(m_size):
 
 		n_rand = random()
-		# print("n_rand: ", n_rand)
 
 		sel_1 = select[j,:2*l]
-		if n_rand > porcetanje:
+		if n_rand > p_cruce:
 			rand = randint(0,m_size-1)
 			sel_2 = select[rand,:2*l]
-			## print("sel_1: ",sel_1,"\nsel_2: ",sel_2)
 			cut1 = randint(1,2*l-1)
 			cut2 = randint(1,2*l-1)
 			if  cut1 > cut2:
@@ -206,7 +199,7 @@ def cruce_2(select,porcetanje):
 	# print("__cruce__")
 	return cruced
 
-def cruce_3(select,porcetanje):
+def cruce_3(select):
 	# print("**cruce**")
 	sel_1=sel_2=ind_12=np.zeros(2*l)
 	cruced=np.zeros((m_size,2*l))
@@ -216,7 +209,7 @@ def cruce_3(select,porcetanje):
 		# print("n_rand: ", n_rand)
 
 		sel_1 = select[j,:2*l]
-		if n_rand > porcetanje:
+		if n_rand > p_cruce:
 
 			for k in range(2*l):
 				n_rand = random()
@@ -235,14 +228,13 @@ def cruce_3(select,porcetanje):
 	# print("__cruce__")
 	return cruced
 
-
-def mute_1(cruced,porcetanje):
+def mute_1(cruced):
 
 	# print("**mute**")
 	for i in range(m_size):
 		n_rand = random()
 		# print("n_rand: ", n_rand)
-		if n_rand > porcetanje:
+		if n_rand > p_mute:
 			cut = randint(1,2*l-1)
 			# print("cut: ",cut,)
 			## print("before: ",cruced[i])
@@ -253,7 +245,6 @@ def mute_1(cruced,porcetanje):
 
 if __name__ == '__main__':
 	
-#algoritmo genetio
 	print("1ra generacion\n")
 
 	l=gen_l(dig)
@@ -266,18 +257,19 @@ if __name__ == '__main__':
 	all_x[:,2*l+1] = x[:,1]
 	all_x[:,2*l+2] = gen_fx
 	
+	if t_cruce=="1": selected=select_ruleta()
+	elif t_cruce=="2":selected=select_estocast()
+
 	print(all_x[:,2*l:2*l+2])
-	# print(all_x[:,2*l:])
-	# print("all_x: ",all_x)
-	# selection_x()
-	# selected = select_estocast()
-	selected = select_ruleta()
-	
-	cruced = cruce_3(selected,0.5)
-	mute_1(cruced,0.5)	
+	if t_cruce=="1": cruced=cruce_1(selected)
+	elif t_cruce=="2": cruced=cruce_2(selected)
+	elif t_cruce=="3": cruced=cruce_3(selected)
+
+	mute_1(cruced)	
+	if eli=="1": elitism(cruced)
+		
 # '''
 # 	print("\n",cruced)
-# 	elitism(cruced)
 # '''
 	for i in range(g):
 		
@@ -290,13 +282,19 @@ if __name__ == '__main__':
 		all_x[:,2*l] = x[:,0]
 		all_x[:,2*l+1] = x[:,1]
 		
-		print(all_x[:,2*l:2*l+3])
+		print(all_x[:,2*l:2*l+2])
 		
-		# selected = select_estocast()	
-		selected = select_ruleta()
-		cruced = cruce_3(selected,0.5)			
-		mute_1(cruced,0.5)
-		elitism(cruced)
+		if t_cruce=="1": selected=select_ruleta()
+		elif t_cruce=="2":selected=select_estocast()
+
+		print(all_x[:,2*l:2*l+2])
+		if t_cruce=="1": cruced=cruce_1(selected)
+		elif t_cruce=="2": cruced=cruce_2(selected)
+		elif t_cruce=="3": cruced=cruce_3(selected)
+
+		mute_1(cruced)
+		print("eli: ",eli)
+		if eli=="1": elitism(cruced)
 '''		
 		# print("\n",cruced)	
 		# print(v_cruce)
