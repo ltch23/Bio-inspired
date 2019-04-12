@@ -19,7 +19,7 @@ eli=data[7][1]
 nor=data[8][1]
 v_min=int(data[8][1])
 v_max=int(data[10][1])
-print(data)
+# print(data)
 
 l=0
 total=0
@@ -27,7 +27,15 @@ dig=6
 left = -100
 right = 100
 i_max=0
+act_mean=0
+sum_mejor=0
 v_best=	np.zeros((exper,g))
+v_off=	np.zeros((exper,g))
+v_on=	np.zeros((exper,g))
+
+bests=	np.zeros((exper))
+offs=	np.zeros((exper))
+ons=	np.zeros((exper))
 
 
 def gen_l(p):
@@ -128,7 +136,7 @@ def select_ruleta():
 	return selected
 
 def select_estocast():
-	print("estocast")
+	# print("estocast")
 	selected = np.zeros((m_size,2*l))
 	tmp=cont=0
 	total=np.sum(all_x[:,2*l+2])
@@ -247,7 +255,7 @@ if __name__ == '__main__':
 	
 	for it in range(exper):
 
-		print("\n0ra generacion")
+		# print("\n0ra generacion")
 
 		l=gen_l(dig)
 		all_x=np.zeros((m_size,2*l+6))
@@ -261,8 +269,15 @@ if __name__ == '__main__':
 		#los mejores
 		
 		mejor=max_()
-		print("mejor: ",mejor)
 		v_best[it,0]=mejor
+
+		act_mean=np.mean(all_x[:,2*l+2])
+		v_on[it,0]=act_mean
+			
+		sum_mejor=mejor
+		v_off[it,0]=sum_mejor
+
+
 
 		# print(all_x[:,2*l:2*l+2])
 
@@ -279,9 +294,9 @@ if __name__ == '__main__':
 	# '''
 	# 	print("\n",cruced)
 	# '''
-		for i in range(g):
+		for i in range(1,g):
 			
-			print ("\n",i," generacion")
+			# print ("\n",i," generacion")
 
 			all_x[:,:-6] = cruced
 			x,gen_fx = functions(cruced)
@@ -291,9 +306,15 @@ if __name__ == '__main__':
 			all_x[:,2*l+2] = gen_fx
 			
 			mejor=max_()
-			print("mejor: ",mejor)
 			v_best[it,i] = mejor
-						
+
+			sum_mejor+=mejor
+			v_off[it,i]=sum_mejor/(i+1)
+
+			act_mean += np.mean(all_x[:,2*l+2])
+			v_on[it,i] = act_mean/(i+1)
+			# print("mean: ",np.mean(all_x[:,2*l+2]))
+		
 			# print(all_x[:,2*l:2*l+2])
 			
 			if t_sele=="1": selected=select_ruleta()
@@ -309,5 +330,13 @@ if __name__ == '__main__':
 			# print("\n",cruced)	
 			# print(v_cruce)
 	'''	
-	np.savetxt("best.txt",np.around(v_best,decimals=6),fmt="%.8g")
+
+	bests=np.mean(v_best,axis=0)
+	offs=np.mean(v_off,axis=0)
+	ons=np.mean(v_on,axis=0)
+
+	name=str(p_mute)+"-"+str(p_cruce)+"_"+str(t_cruce)
+	np.savetxt("best"+name+".txt",np.around(bests,decimals=6),fmt="%.8g")
+	np.savetxt("off"+name+".txt",np.around(offs,decimals=6),fmt="%.8g")
+	np.savetxt("on"+name+".txt",np.around(ons,decimals=6),fmt="%.8g")
 
