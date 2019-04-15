@@ -33,9 +33,7 @@ v_best=	np.zeros((exper,g))
 v_off=	np.zeros((exper,g))
 v_on=	np.zeros((exper,g))
 
-bests=	np.zeros((exper))
-offs=	np.zeros((exper))
-ons=	np.zeros((exper))
+curvas = np.zeros((g,3))
 
 
 def gen_l(p):
@@ -331,12 +329,10 @@ if __name__ == '__main__':
 			# print(v_cruce)
 	'''	
 
-	bests=np.mean(v_best,axis=0)
-	offs=np.mean(v_off,axis=0)
-	ons=np.mean(v_on,axis=0)
+	curvas[:,0]=np.mean(v_best,axis=0)
+	curvas[:,1]=np.mean(v_off,axis=0)
+	curvas[:,2]=np.mean(v_on,axis=0)
 
 	name=str(p_mute)+"-"+str(p_cruce)+"_"+str(t_cruce)
-	np.savetxt("best"+name+".txt",np.around(bests,decimals=6),fmt="%.8g")
-	np.savetxt("off"+name+".txt",np.around(offs,decimals=6),fmt="%.8g")
-	np.savetxt("on"+name+".txt",np.around(ons,decimals=6),fmt="%.8g")
+	np.savetxt("curvas"+name+".txt",np.around(curvas,decimals=6),fmt="%.8g")
 
