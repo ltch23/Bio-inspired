@@ -6,6 +6,7 @@ from random import *
 np.set_printoptions(suppress=True)
 
 f = open("datos.txt", "r")
+fout = open("out", "w+")
 data=[x.split() for x in f ]
 
 m_size=int(data[0][1])
@@ -17,7 +18,7 @@ p_cruce=float(data[5][1])
 p_mute=float(data[6][1])
 eli=data[7][1]
 nor=data[8][1]
-v_min=int(data[8][1])
+v_min=int(data[9][1])
 v_max=int(data[10][1])
 # print(data)
 
@@ -333,6 +334,6 @@ if __name__ == '__main__':
 	curvas[:,1]=np.mean(v_off,axis=0)
 	curvas[:,2]=np.mean(v_on,axis=0)
 
-	name=str(p_mute)+"-"+str(p_cruce)+"_"+str(t_cruce)
+	name=str(t_sele)+"-"+str(p_mute)+"-"+str(p_cruce)+"tc"+str(t_cruce)+str(eli)+str(nor)
 	np.savetxt("curvas"+name+".txt",np.around(curvas,decimals=6),fmt="%.8g")
-
+	fout.write(name)
