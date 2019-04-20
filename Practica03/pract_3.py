@@ -1,6 +1,5 @@
 import numpy as np
 import math as m
-from matplotlib import pyplot
 from random import *
 
 np.set_printoptions(suppress=True)
@@ -87,8 +86,8 @@ def max_():
 			maximo=temp
 			ind=i
 	i_max=ind
-	mejor=all_x[i_max,2*l+2]
-	return mejor
+	ind_mejor=all_x[i_max,:]
+	return ind_mejor
 
 def swap(x1,x2):
 	temp=x1
@@ -96,10 +95,9 @@ def swap(x1,x2):
 	x2=temp
 	return x1,x2
 
-def elitism(xs):
+def elitism(xs,ind):
 	rand = randint(0,m_size-1)
-	max_()
-	xs[rand,:]=	all_x[i_max,:2*l]
+	xs[rand,:]=	ind[:-6]
 	return xs	
 
 def normalization(min_,max_):
@@ -136,7 +134,7 @@ def select_ruleta():
 
 def select_estocast():
 	# print("estocast")
-	selected = np.zeros((m_size,2*l))
+	selected = np.zeros((m_size,2*l+3))
 	tmp=cont=0
 	total=np.sum(all_x[:,2*l+2])
 	for i in range(m_size):
@@ -146,7 +144,7 @@ def select_estocast():
 		all_x[i,2*l+5] = all_x[i,2*l+3]-all_x[i,2*l+4]
 	for j in range(m_size):
 		if np.greater_equal(all_x[j,2*l+4],1.0)==True:
-			selected[cont,:] = all_x[j,:-6]
+			selected[cont,:] = all_x[j,:-3]
 			cont+=1
 	tmp=0
 	for i in range(m_size):
@@ -155,7 +153,7 @@ def select_estocast():
 
 	for k in range(cont,m_size):
 		i_sel = ruleta(total)
-		selected[k,:]=all_x[i_sel,:-6]
+		selected[k,:]=all_x[i_sel,:-3]
 
 	return selected
 
@@ -254,7 +252,7 @@ if __name__ == '__main__':
 	
 	for it in range(exper):
 
-		# print("\n0ra generacion")
+		print("\n0ra generacion")
 
 		l=gen_l(dig)
 		all_x=np.zeros((m_size,2*l+6))
@@ -265,9 +263,11 @@ if __name__ == '__main__':
 		all_x[:,2*l] = x[:,0]
 		all_x[:,2*l+1] = x[:,1]
 		all_x[:,2*l+2] = gen_fx
-		#los mejores
-		
-		mejor=max_()
+		#los mejores	
+		# print(all_x[:,2*l:])
+
+		ind_mejor=max_()
+		mejor=ind_mejor[2*l+2]
 		v_best[it,0]=mejor
 
 		act_mean=np.mean(all_x[:,2*l+2])
@@ -287,15 +287,17 @@ if __name__ == '__main__':
 		elif t_cruce=="2": cruced=cruce_2(selected)
 		elif t_cruce=="3": cruced=cruce_3(selected)
 
-		mute_1(cruced)	
-		if eli=="1": elitism(cruced)
+		mute_1(cruced)
+		# print(cruced,"\n")
+		if eli=="1": cruced = elitism(cruced,ind_mejor)
+		# print(cruced)
 			
 	# '''
 	# 	print("\n",cruced)
 	# '''
 		for i in range(1,g):
 			
-			# print ("\n",i," generacion")
+			print ("\n",i," generacion")
 
 			all_x[:,:-6] = cruced
 			x,gen_fx = functions(cruced)
@@ -304,7 +306,10 @@ if __name__ == '__main__':
 			all_x[:,2*l+1] = x[:,1]
 			all_x[:,2*l+2] = gen_fx
 			
-			mejor=max_()
+			# print(all_x[:,2*l:])	
+			ind_mejor=max_()
+			mejor=ind_mejor[2*l+2]
+
 			v_best[it,i] = mejor
 
 			sum_mejor+=mejor
@@ -324,7 +329,8 @@ if __name__ == '__main__':
 			elif t_cruce=="3": cruced=cruce_3(selected)
 
 			mute_1(cruced)
-			if eli=="1": elitism(cruced)
+			if eli=="1": cruced = elitism(cruced,ind_mejor)
+
 	'''		
 			# print("\n",cruced)	
 			# print(v_cruce)
