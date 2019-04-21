@@ -215,6 +215,7 @@ def cruce_3(select):
 	# print("**cruce**")
 	sel_1=sel_2=ind_12=np.zeros(n_x*l)
 	cruced=np.zeros((m_size,n_x*l))
+	# print("before\n",selected.astype(int))
 	for j in range(m_size):
 
 		n_rand = random()
@@ -238,7 +239,71 @@ def cruce_3(select):
 			# print("here")
 
 	# print("__cruce__")
+	# print("after\n",cruced.astype(int))
 	return cruced
+
+def cruce_4(select):
+
+	# print("**cruce**")
+	sel_1=sel_2=ind_12=np.zeros(n_x*l)
+	cruced=np.zeros((m_size,n_x*l))
+	for j in range(m_size):
+
+		n_rand = random()
+
+		sel_1 = select[j,:n_x*l]
+		if n_rand > p_cruce:
+			rand = randint(0,m_size-1)
+			sel_2 = select[rand,:n_x*l]
+
+			tmp=0
+			for i in range(n_x*l-1,1,-1):
+				cruced[j,i]=sel_1[i]+sel_2[i]+tmp
+				if cruced[j,i] == 2:
+					cruced[j,i] = 0
+					tmp=1
+				elif cruced[j,i] == 3:
+					cruced[j,i] = 1
+					tmp=1
+		else:
+			cruced[j,:]=select[j,:n_x*l]
+			# print("here")
+
+	# print("__cruce__")
+	# print(cruced)
+	return cruced
+
+def cruce_5(select):
+	# print("**cruce**")
+	sel_1=sel_2=ind_12=np.zeros(n_x*l)
+	cruced=np.zeros((m_size,n_x*l))
+	for j in range(m_size):
+
+		n_rand = random()
+
+		sel_1 = select[j,:n_x*l]
+		if n_rand > p_cruce:
+
+			sel_2 = select[i_max,:n_x*l]
+			cut1 = randint(1,n_x*l-1)
+			cut2 = randint(1,n_x*l-1)
+			if  cut1 > cut2:
+				swap(cut1,cut2)
+
+			ind_12 = np.concatenate((sel_2[:cut1],sel_1[cut1:]))
+			ind_12 = np.concatenate((ind_12[:cut2],sel_2[cut2:]))
+
+			## print("crecu: ",sel_1[:cut],"+",sel_2[cut:])
+			# print("cruce: ",ind_12)
+			cruced[j,:]=ind_12
+		else:
+			cruced[j,:]=select[j,:n_x*l]
+			# print("here")
+
+	# print("__cruce__")
+	return cruced
+
+
 
 def mute_1(cruced):
 
@@ -290,9 +355,11 @@ if __name__ == '__main__':
 		if t_cruce=="1": cruced=cruce_1(selected)
 		elif t_cruce=="2": cruced=cruce_2(selected)
 		elif t_cruce=="3": cruced=cruce_3(selected)
+		elif t_cruce=="4": cruced=cruce_4(selected.astype(int))
+		elif t_cruce=="5": cruced=cruce_5(selected)
 
 		mute_1(cruced)
-		# print(cruced,"\n")
+
 		if eli=="1": cruced = elitism(cruced,ind_mejor)
 		# print(cruced)
 			
@@ -333,8 +400,11 @@ if __name__ == '__main__':
 			if t_cruce=="1": cruced=cruce_1(selected)
 			elif t_cruce=="2": cruced=cruce_2(selected)
 			elif t_cruce=="3": cruced=cruce_3(selected)
+			elif t_cruce=="4": cruced=cruce_4(selected.astype(int))
+			elif t_cruce=="5": cruced=cruce_5(selected)
 
 			mute_1(cruced)
+			
 			if eli=="1": cruced = elitism(cruced,ind_mejor)
 
 	# '''		
