@@ -1,0 +1,13 @@
+dimensiones 5
+poblacion 100
+generaciones 40
+experimentos 1
+tipo_sele 2		1,2
+tipo_cruces 3      1,2,3 
+tipo_mute 2 1,2,3
+prob_cruce 0.65
+prob_mut 0.8
+elitismo 1	0 ->no 1 -> si 
+normalizacion 0 0 ->no 1 -> si
+v_min 1
+v_max 200
