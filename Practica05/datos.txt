@@ -1,0 +1,7 @@
+dimensiones 2
+poblacion 40
+generaciones 1000
+experimentos 20
+min -500 
+max 500
+funcion 2  1 o 2
